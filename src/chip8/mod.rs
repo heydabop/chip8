@@ -44,7 +44,7 @@ impl Chip8 {
             memory,
             v: [0; 16],
             i: 0,
-            pc: 0,
+            pc: 0x200, // programs start at 0x200
             gfx: [0; 64 * 32],
             delay_timer: 0,
             sound_timer: 0,
