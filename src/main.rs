@@ -8,6 +8,19 @@ use sdl2::pixels;
 use sdl2::rect::Rect;
 
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() < 2 {
+        eprintln!(
+            "Usage: {} <path to ROM>",
+            if args.len() > 0 {
+                &args[0]
+            } else {
+                "<program>"
+            }
+        );
+        std::process::exit(1);
+    }
+
     let sdl_ctx = sdl2::init().unwrap();
     let video = sdl_ctx.video().unwrap();
 
@@ -28,7 +41,7 @@ fn main() {
     let mut event_pump = sdl_ctx.event_pump().unwrap();
 
     let mut emu = chip8::Chip8::new();
-    emu.load_game("pong.c8").unwrap();
+    emu.load_game(&args[1]).unwrap();
 
     let sleep = std::time::Duration::from_millis(16);
 
