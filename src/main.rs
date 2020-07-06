@@ -12,7 +12,7 @@ fn main() {
     let video = sdl_ctx.video().unwrap();
 
     let window = video
-        .window("CHIP-8", 64, 32)
+        .window("CHIP-8", 64 * 2, 32 * 2)
         .position_centered()
         .build()
         .unwrap();
@@ -36,11 +36,20 @@ fn main() {
 
         if emu.draw_flag() {
             let gfx = emu.gfx();
+            canvas.set_draw_color(black);
+            canvas.clear();
+            canvas.set_draw_color(white);
             for (i, p) in gfx.iter().enumerate() {
+                if *p == 0 {
+                    continue;
+                }
                 let i = i as i16;
-                canvas
-                    .pixel(i % 64, i / 64, if *p != 0 { white } else { black })
-                    .unwrap();
+                let x = (i % 64) * 2;
+                let y = (i / 64) * 2;
+                canvas.pixel(x, y, white).unwrap();
+                canvas.pixel(x + 1, y, white).unwrap();
+                canvas.pixel(x, y + 1, white).unwrap();
+                canvas.pixel(x + 1, y + 1, white).unwrap();
             }
             canvas.present();
         }
