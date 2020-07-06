@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 pub struct Chip8 {
+    // CHIP-8 VM
     opcode: u16,        // current opcode
     memory: [u8; 4096], // system memory
     v: [u16; 16],       // registers V0-VE (VF is flag for some instructions)
@@ -15,6 +16,8 @@ pub struct Chip8 {
     sp: u16,       // stack pointer
     key: [u8; 16], // hex keypad state
 
+    // emulator resources
+    draw_flag: bool,
     rng: ThreadRng,
 }
 
@@ -57,6 +60,8 @@ impl Chip8 {
             stack: [0; 16],
             sp: 0,
             key: [0; 16],
+
+            draw_flag: false,
             rng: rand::thread_rng(),
         }
     }
@@ -67,10 +72,20 @@ impl Chip8 {
         Ok(())
     }
 
+    pub fn draw_flag(&self) -> bool {
+        self.draw_flag
+    }
+
+    pub fn gfx(&self) -> &[u8] {
+        &self.gfx
+    }
+
     pub fn emulate_cycle(&mut self) {
         let pc = self.pc as usize;
         // two-byte opcodes
         self.opcode = (self.memory[pc] as u16) << 8 | self.memory[pc + 1] as u16;
+
+        self.draw_flag = false;
 
         match self.opcode & 0xF000 {
             0 => {
@@ -250,7 +265,7 @@ impl Chip8 {
                         // iter bit shift across sprite pixel from memory
                         if pixel & (0x80 >> p) != 0 {
                             // sprite pixel is set in memory
-                            let gfx_offset = 64 * vy + vx;
+                            let gfx_offset = 64 * (vy + row) + vx + p;
                             self.gfx[gfx_offset] = if self.gfx[gfx_offset] == 1 {
                                 // screen pixel is set and being unset
                                 self.v[0xF] = 1;
@@ -263,7 +278,7 @@ impl Chip8 {
                     }
                 }
 
-                // TODO: draw flag?
+                self.draw_flag = true;
                 self.pc += 2;
             }
             0xE000 => {
