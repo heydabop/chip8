@@ -91,13 +91,13 @@ impl Chip8 {
             0 => {
                 match self.opcode & 0xFF {
                     0xE0 => {
-                        // E0
+                        // 00E0
                         // clear screen
                         self.gfx = [0; 64 * 32];
                         self.pc += 2;
                     }
                     0xEE => {
-                        // EE
+                        // 00EE
                         // return from subroutine
                         if self.sp < 1 {
                             panic!("Hit opcode 0xEE with SP below 1");
@@ -227,7 +227,7 @@ impl Chip8 {
             0xA000 => {
                 // ANNN
                 // set I to NNN
-                self.i = self.opcode & 0x0FFF;
+                self.i = self.opcode & 0xFFF;
                 self.pc += 2;
             }
             0xB000 => {
@@ -357,7 +357,7 @@ impl Chip8 {
                         // 0xFX55
                         // store V0 to VX (inclusive) in memory at I
                         let i = self.i as usize;
-                        for offset in 0..x {
+                        for offset in 0..=x {
                             self.memory[i + offset] = self.v[offset] as u8;
                         }
                     }
@@ -365,7 +365,7 @@ impl Chip8 {
                         // 0xFX65
                         // fill V0 to VX (inclusive) from memory at I
                         let i = self.i as usize;
-                        for offset in 0..x {
+                        for offset in 0..=x {
                             self.v[offset] = self.memory[i + offset] as u16;
                         }
                     }

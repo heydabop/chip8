@@ -12,7 +12,7 @@ fn main() {
     if args.len() < 2 {
         eprintln!(
             "Usage: {} <path to ROM>",
-            if args.len() > 0 {
+            if !args.is_empty() {
                 &args[0]
             } else {
                 "<program>"
