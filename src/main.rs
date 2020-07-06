@@ -3,16 +3,17 @@ extern crate sdl2;
 mod chip8;
 
 use sdl2::event::Event;
-use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels;
+use sdl2::rect::Rect;
 
 fn main() {
     let sdl_ctx = sdl2::init().unwrap();
     let video = sdl_ctx.video().unwrap();
 
+    let scale = 4;
     let window = video
-        .window("CHIP-8", 64 * 2, 32 * 2)
+        .window("CHIP-8", 64 * scale, 32 * scale)
         .position_centered()
         .build()
         .unwrap();
@@ -39,18 +40,17 @@ fn main() {
             canvas.set_draw_color(black);
             canvas.clear();
             canvas.set_draw_color(white);
+            let mut rects = Vec::new();
             for (i, p) in gfx.iter().enumerate() {
                 if *p == 0 {
                     continue;
                 }
-                let i = i as i16;
-                let x = (i % 64) * 2;
-                let y = (i / 64) * 2;
-                canvas.pixel(x, y, white).unwrap();
-                canvas.pixel(x + 1, y, white).unwrap();
-                canvas.pixel(x, y + 1, white).unwrap();
-                canvas.pixel(x + 1, y + 1, white).unwrap();
+                let i = i as i32;
+                let x = (i % 64) * scale as i32;
+                let y = (i / 64) * scale as i32;
+                rects.push(Rect::new(x, y, scale, scale));
             }
+            canvas.fill_rects(&rects).unwrap();
             canvas.present();
         }
 
