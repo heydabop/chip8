@@ -1,4 +1,6 @@
 use rand::prelude::*;
+use std::fs::File;
+use std::io::prelude::*;
 
 pub struct Chip8 {
     opcode: u16,        // current opcode
@@ -57,6 +59,12 @@ impl Chip8 {
             key: [0; 16],
             rng: rand::thread_rng(),
         }
+    }
+
+    pub fn load_game(&mut self, filename: &str) -> std::io::Result<()> {
+        let mut file = File::open(filename)?;
+        let _ = file.read(&mut self.memory[0x200..])?;
+        Ok(())
     }
 
     pub fn emulate_cycle(&mut self) {
