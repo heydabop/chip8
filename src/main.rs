@@ -1,5 +1,10 @@
 mod chip8;
 
 fn main() {
-    let _emu = chip8::Chip8::new();
+    let mut emu = chip8::Chip8::new();
+    // emu.loadGame();
+
+    loop {
+        emu.emulate_cycle();
+    }
 }
