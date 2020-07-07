@@ -104,7 +104,7 @@ impl Chip8 {
                         }
                         self.sp -= 1;
                         let sp = self.sp as usize;
-                        self.pc = self.stack[sp];
+                        self.pc = self.stack[sp] + 2;
                         self.stack[sp] = 0;
                     }
                     _ => panic!("Unhandled opcode {:X}", self.opcode),
