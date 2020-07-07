@@ -6,7 +6,7 @@ pub struct Chip8 {
     // CHIP-8 VM
     opcode: u16,        // current opcode
     memory: [u8; 4096], // system memory
-    v: [u16; 16],       // registers V0-VE (VF is flag for some instructions)
+    v: [u8; 16],        // registers V0-VE (VF is flag for some instructions)
     i: u16,             // address register
     pc: u16,            // program counter
     gfx: [u8; 64 * 32], // pixels state
@@ -137,14 +137,14 @@ impl Chip8 {
                 // 3XNN
                 // skip if VX == NN
                 let x = ((self.opcode & 0xF00) >> 8) as usize;
-                let n = self.opcode & 0xFF;
+                let n = (self.opcode & 0xFF) as u8;
                 self.pc += if self.v[x] == n { 4 } else { 2 };
             }
             0x4000 => {
                 // 4XNN
                 // skip if VX != NN
                 let x = ((self.opcode & 0xF00) >> 8) as usize;
-                let n = self.opcode & 0xFF;
+                let n = (self.opcode & 0xFF) as u8;
                 self.pc += if self.v[x] != n { 4 } else { 2 };
             }
             0x5000 => {
@@ -158,7 +158,7 @@ impl Chip8 {
                 // 6XNN
                 // set VX to NN
                 let x = ((self.opcode & 0xF00) >> 8) as usize;
-                let n = self.opcode & 0xFF;
+                let n = (self.opcode & 0xFF) as u8;
                 self.v[x] = n;
                 self.pc += 2;
             }
@@ -166,7 +166,7 @@ impl Chip8 {
                 // 7XNN
                 // add NN to VX (no carry)
                 let x = ((self.opcode & 0xF00) >> 8) as usize;
-                let n = self.opcode & 0xFF;
+                let n = (self.opcode & 0xFF) as u8;
                 self.v[x] += n;
                 self.pc += 2;
             }
@@ -245,14 +245,14 @@ impl Chip8 {
                 // BNNN
                 // jump to NNN + V0
                 let n = self.opcode & 0xFFF;
-                self.pc = n + self.v[0];
+                self.pc = n + self.v[0] as u16;
             }
             0xC000 => {
                 // CXNN
                 // Set VX = RNG[0, 256) & NN
                 let x = ((self.opcode & 0xF00) >> 8) as usize;
-                let n = self.opcode & 0xFF;
-                self.v[x] = n & self.rng.gen_range(0, 256);
+                let n = (self.opcode & 0xFF) as u8;
+                self.v[x] = n & (self.rng.gen_range(0, 256) as u8);
                 self.pc += 2;
             }
             0xD000 => {
@@ -316,14 +316,14 @@ impl Chip8 {
                     0x7 => {
                         // 0xFX07
                         // set VX to delay timer
-                        self.v[x] = self.delay_timer as u16;
+                        self.v[x] = self.delay_timer;
                     }
                     0xA => {
                         // 0xFX0A
                         // store next key press in VX, blocking instruction
                         let mut pressed = false;
                         // check all keys recording the first pressed one
-                        for i in 0..0xF as u16 {
+                        for i in 0..0xF as u8 {
                             if self.key[i as usize] == 1 {
                                 pressed = true;
                                 self.v[x] = i;
@@ -347,12 +347,12 @@ impl Chip8 {
                     0x1E => {
                         // 0xFX1E
                         // add VX to I
-                        self.i += self.v[x];
+                        self.i += self.v[x] as u16;
                     }
                     0x29 => {
                         // 0xFX29
                         // set I to location in memory of sprite for character in VX
-                        self.i = 5 * self.v[x]; // we're storing fontset in the first 80 bytes, 5 bytes per sprite
+                        self.i = 5 * self.v[x] as u16; // we're storing fontset in the first 80 bytes, 5 bytes per sprite
                     }
                     0x33 => {
                         // 0xFX33
@@ -377,7 +377,7 @@ impl Chip8 {
                         // fill V0 to VX (inclusive) from memory at I
                         let i = self.i as usize;
                         for offset in 0..=x {
-                            self.v[offset] = self.memory[i + offset] as u16;
+                            self.v[offset] = self.memory[i + offset];
                         }
                     }
                     _ => panic!("Unhandled opcode {:X}", self.opcode),
