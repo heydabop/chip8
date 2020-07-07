@@ -3,7 +3,7 @@ extern crate sdl2;
 mod chip8;
 
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use sdl2::keyboard::{Keycode, Scancode};
 use sdl2::pixels;
 use sdl2::rect::Rect;
 
@@ -20,6 +20,25 @@ fn main() {
         );
         std::process::exit(1);
     }
+
+    let keypad = [
+        Scancode::X,    // 0
+        Scancode::Num1, // 1
+        Scancode::Num2, // 2
+        Scancode::Num3, // 3
+        Scancode::Q,    // 4
+        Scancode::W,    // 5
+        Scancode::E,    // 6
+        Scancode::A,    // 7
+        Scancode::S,    // 8
+        Scancode::D,    // 9
+        Scancode::Z,    // A
+        Scancode::C,    // B
+        Scancode::Num4, // C
+        Scancode::R,    // D
+        Scancode::F,    // E
+        Scancode::V,    // F
+    ];
 
     let sdl_ctx = sdl2::init().unwrap();
     let video = sdl_ctx.video().unwrap();
@@ -75,6 +94,14 @@ fn main() {
                     ..
                 } => break 'main,
                 _ => {}
+            }
+        }
+
+        emu.clear_keys();
+
+        for key in event_pump.keyboard_state().pressed_scancodes() {
+            if let Some(i) = keypad.iter().position(|&k| k == key) {
+                emu.press_key(i);
             }
         }
 

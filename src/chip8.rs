@@ -80,6 +80,14 @@ impl Chip8 {
         &self.gfx
     }
 
+    pub fn clear_keys(&mut self) {
+        self.key = [0; 16];
+    }
+
+    pub fn press_key(&mut self, key: usize) {
+        self.key[key] = 1;
+    }
+
     pub fn emulate_cycle(&mut self) {
         let pc = self.pc as usize;
         // two-byte opcodes
