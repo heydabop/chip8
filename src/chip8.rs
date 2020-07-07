@@ -85,6 +85,9 @@ impl Chip8 {
         // two-byte opcodes
         self.opcode = (self.memory[pc] as u16) << 8 | self.memory[pc + 1] as u16;
 
+        #[cfg(debug_assertions)]
+        println!("{:X}", self.opcode);
+
         self.draw_flag = false;
 
         match self.opcode & 0xF000 {
@@ -384,6 +387,24 @@ impl Chip8 {
                 println!("BEEP!");
             }
             self.sound_timer -= 1;
+        }
+
+        #[cfg(debug_assertions)]
+        {
+            print!("[ ");
+            for v in &self.v {
+                print!("{:0>2X} ", v);
+            }
+            print!("]\n[ ");
+            for s in &self.stack {
+                print!("{:0>2X} ", s);
+            }
+            println!("]\nI: {:X}", self.i);
+            print!("PC: {:X}\n[ ", self.pc);
+            for b in &self.memory[0x200..0x300] {
+                print!("{:0>2X} ", b);
+            }
+            println!("]\n");
         }
     }
 }
