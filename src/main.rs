@@ -62,7 +62,7 @@ fn main() {
     let mut emu = chip8::Chip8::new();
     emu.load_game(&args[1]).unwrap();
 
-    let sleep = std::time::Duration::from_millis(16);
+    let sleep = std::time::Duration::from_millis(3);
 
     'main: loop {
         emu.emulate_cycle();
