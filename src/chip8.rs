@@ -276,7 +276,7 @@ impl Chip8 {
                         // iter bit shift across sprite pixel from memory
                         if pixel & (0x80 >> p) != 0 {
                             // sprite pixel is set in memory
-                            let gfx_offset = 64 * (vy + row) + vx + p;
+                            let gfx_offset = 64 * ((vy + row) % 32) + (vx + p) % 64;
                             self.gfx[gfx_offset] = if self.gfx[gfx_offset] == 1 {
                                 // screen pixel is set and being unset
                                 self.v[0xF] = 1;
