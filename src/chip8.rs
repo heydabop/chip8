@@ -2,6 +2,8 @@ use rand::prelude::*;
 use std::fs::File;
 use std::io::prelude::*;
 
+static SLEEP_MS: std::time::Duration = std::time::Duration::from_millis(3);
+
 pub struct Chip8 {
     // CHIP-8 VM
     opcode: u16,        // current opcode
@@ -12,6 +14,7 @@ pub struct Chip8 {
     gfx: [u8; 64 * 32], // pixels state
     delay_timer: u8,
     sound_timer: u8, // timers count down at 60Hz
+    timer_tick: u8, // since timers count at 60Hz but we run faster than that we'll only decrement when this timer is 0
     stack: [u16; 16],
     sp: u16,       // stack pointer
     key: [u8; 16], // hex keypad state
@@ -57,6 +60,7 @@ impl Chip8 {
             gfx: [0; 64 * 32],
             delay_timer: 0,
             sound_timer: 0,
+            timer_tick: 0,
             stack: [0; 16],
             sp: 0,
             key: [0; 16],
@@ -89,6 +93,8 @@ impl Chip8 {
     }
 
     pub fn emulate_cycle(&mut self) {
+        std::thread::sleep(SLEEP_MS);
+
         let pc = self.pc as usize;
         // two-byte opcodes
         self.opcode = (self.memory[pc] as u16) << 8 | self.memory[pc + 1] as u16;
@@ -387,15 +393,18 @@ impl Chip8 {
             _ => panic!("Unhandled opcode {:X}", self.opcode),
         }
 
-        if self.delay_timer > 0 {
-            self.delay_timer -= 1;
-        }
-        if self.sound_timer > 0 {
-            if self.sound_timer == 1 {
-                println!("BEEP!");
+        if self.timer_tick == 0 {
+            if self.delay_timer > 0 {
+                self.delay_timer -= 1;
             }
-            self.sound_timer -= 1;
+            if self.sound_timer > 0 {
+                if self.sound_timer == 1 {
+                    println!("BEEP!");
+                }
+                self.sound_timer -= 1;
+            }
         }
+        self.timer_tick = (self.timer_tick + 1) % 5;
 
         #[cfg(debug_assertions)]
         {
