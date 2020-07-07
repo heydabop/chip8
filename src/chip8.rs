@@ -219,7 +219,7 @@ impl Chip8 {
                         self.v[x] >>= 1;
                     }
                     0x7 => {
-                        // 8XY6
+                        // 8XY7
                         // set VX to VY - VX (set VF = 0 if there's a borrow and 1 if not)
                         self.v[0xF] = if self.v[x] > self.v[y] { 0 } else { 1 };
                         self.v[x] = self.v[y] - self.v[x];
@@ -227,7 +227,7 @@ impl Chip8 {
                     0xE => {
                         // 8X0E
                         // store the MSB of VX in VF and shift VX one to the left
-                        self.v[0xF] = self.v[x] & 0x80;
+                        self.v[0xF] = if self.v[x] & 0x80 == 0x80 { 1 } else { 0 };
                         self.v[x] <<= 1;
                     }
                     _ => panic!("Unhandled opcode {:X}", self.opcode),
