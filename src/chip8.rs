@@ -443,17 +443,13 @@ impl Chip8 {
                 // 0xFX55
                 // store V0 to VX (inclusive) in memory at I
                 let i = self.i as usize;
-                for offset in 0..=x {
-                    self.memory[i + offset] = self.v[offset] as u8;
-                }
+                self.memory[i..=x + i].copy_from_slice(&self.v[..=x]);
             }
             0x65 => {
                 // 0xFX65
                 // fill V0 to VX (inclusive) from memory at I
                 let i = self.i as usize;
-                for offset in 0..=x {
-                    self.v[offset] = self.memory[i + offset];
-                }
+                self.v[..=x].copy_from_slice(&self.memory[i..=x + i]);
             }
             _ => panic!("Unhandled opcode {:X}", self.opcode),
         }
