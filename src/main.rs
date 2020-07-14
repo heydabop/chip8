@@ -1,7 +1,9 @@
 extern crate sdl2;
 
+mod audio;
 mod chip8;
 
+use sdl2::audio::AudioSpecDesired;
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Scancode};
 use sdl2::pixels;
@@ -57,6 +59,21 @@ fn main() {
     canvas.clear();
     canvas.present();
 
+    let audio_subsystem = sdl_ctx.audio().unwrap();
+    let audio_spec = AudioSpecDesired {
+        freq: Some(44_100),
+        channels: Some(1), // mono
+        samples: None,     // default
+    };
+    let audio_device = audio_subsystem
+        .open_playback(None, &audio_spec, |spec| audio::SquareWave {
+            phase_inc: 440.0 / spec.freq as f32,
+            phase: 0.0,
+            volume: 0.25,
+        })
+        .unwrap();
+    let mut audio_playing = false;
+
     let mut event_pump = sdl_ctx.event_pump().unwrap();
 
     let mut emu = chip8::Chip8::new();
@@ -82,6 +99,16 @@ fn main() {
             }
             canvas.fill_rects(&rects).unwrap();
             canvas.present();
+        }
+
+        if audio_playing != emu.sound_flag() {
+            if emu.sound_flag() {
+                audio_playing = true;
+                audio_device.resume();
+            } else {
+                audio_playing = false;
+                audio_device.pause();
+            }
         }
 
         for e in event_pump.poll_iter() {

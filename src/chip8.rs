@@ -103,6 +103,10 @@ impl Chip8 {
         &self.gfx
     }
 
+    pub fn sound_flag(&self) -> bool {
+        self.sound_timer > 0
+    }
+
     pub fn clear_keys(&mut self) {
         self.key = [0; 16];
     }
@@ -131,9 +135,6 @@ impl Chip8 {
                 self.delay_timer -= 1;
             }
             if self.sound_timer > 0 {
-                if self.sound_timer == 1 {
-                    println!("BEEP!");
-                }
                 self.sound_timer -= 1;
             }
         }
